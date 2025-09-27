@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>排行榜</title>
+    <style>
+      .page {
+        margin: 0;
+        height: 100%;
+        font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto,
+          Helvetica Neue, Arial, Noto Sans, sans-serif, Apple Color Emoji,
+          Segoe UI Emoji, Segoe UI Symbol, Noto Color Emoji;
+      }
+      .page {
+        display: flex;
+        flex-direction: column;
+        background-color: #eee;
+        max-width: 1024px;
+        margin: auto;
+      }
+      .top {
+        position: relative;
+        z-index: 1;
+        width: 100%;
+        background-color: #d23e34;
+        padding-top: 15px;
+        box-shadow: 0 2px 10px 0 rgba(0, 0, 0, 0.2);
+      }
+      .top-title {
+        text-align: center;
+        font-size: 18px;
+        color: #fff;
+      }
+      .tabs {
+        padding: 15px;
+      }
+      .tabs > ul {
+        margin: 0;
+        display: flex;
+        border-radius: 10px;
+        background-color: #cd2523;
+        overflow: hidden;
+        padding: 0;
+      }
+      .tab-item {
+        flex: 1;
+        text-align: center;
+        line-height: 40px;
+        color: #fff;
+        font-size: 16px;
+        cursor: pointer;
+        list-style: none;
+      }
+      .tab-active {
+        background-color: #b9211f;
+      }
+      .cats {
+        padding: 15px;
+        border-radius: 10px 10px 0 0;
+        background-color: #fff;
+      }
+      .cat-list {
+        display: flex;
+        overflow-x: auto;
+        padding: 0;
+        margin: 0;
+      }
+      .cat-list::-webkit-scrollbar {
+        display: none;
+      }
+      .cat-item {
+        line-height: 25px;
+        background-color: #f7f7f7;
+        font-size: 14px;
+        color: #333;
+        padding: 0 12px;
+        border-radius: 5px;
+        margin-right: 10px;
+        white-space: nowrap;
+        list-style: none;
+      }
+      .cat-active {
+        background-color: #d23e34;
+        color: #fff;
+      }
+      .list {
+        position: relative;
+        width: 100%;
+        flex: 1;
+        overflow: auto;
+        padding: 15px;
+      }
+      .sku {
+        display: block;
+        text-decoration: none;
+        padding: 15px;
+        border-radius: 20px;
+        background-color: #fff;
+        margin-bottom: 17px;
+        width: 90%;
+        margin-left: 9px;
+      }
+      .sku:last-child {
+        margin-bottom: 0;
+      }
+      .content {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+      .cover {
+        width: 80%;
+        height: 80%;
+        position: relative;
+        border-radius: 5px;
+        overflow: hidden;
+      }
+      .cover-img {
+        width: 100%;
+        height: auto;
+      }
+      .cover-rank {
+        position: absolute;
+        width: 60px;
+        left: 0;
+        top: 0;
+      }
+      .comment {
+        background-color: #f7f7f7;
+        border-radius: 5px;
+        padding: 10px;
+        color: #666;
+        margin-top: 15px;
+        font-size: 25px;
+        text-align: left;
+        font-size: large;
+        width: 80%;
+        margin-left: auto;
+        margin-right: auto;
+      }
+      .comment strong {
+        display:block;
+        top: 0;
+        color: #333;
+        margin-bottom: 10px;
+      }
+      .desc-number {
+        margin-left: 3px;
+        font-size:small;
+      }
+      .desc .iconfont {
+        margin-left: 20px;
+      }
+      .desc .icon-comment {
+        margin-left: 0;
+      }
+      .desc {
+        display: flex;
+        align-items: center;
+        font-size: 12px;
+        color: #999;
+      }
+      .source {
+        flex: 1;
+      }
+      .icon-article {
+        width: 18px;
+        height: 18px;
+        vertical-align: middle;
+        margin: 0 4px 0 10px; /* 左右间距可根据需要调整 */
+      }
+      .icon-inline {
+        width: 16px;
+        height: 1em; /* 跟随字体大小 */
+        vertical-align: middle; /* 垂直居中对齐文字 */
+        margin: 0 2px; /* 左右间距可根据需要调整 */
+        display: inline-block;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page">
+      <header class="top">
+        <div class="top-title">排行榜</div>
+        <nav class="tabs">
+          <ul>
+            <li class="tab-item tab-active">好文精选</li>
+            <li class="tab-item">热门咨询</li>
+          </ul>
+        </nav>
+        <nav class="cats">
+          <ul class="cat-list">
+            <li class="cat-item cat-active">文章</li>
+          </ul>
+        </nav>
+      </header>
+      <main class="list">
+        <a href="https://www.bilibili.com/video/BV1rzJQzjECs/?vd_source=31ac2d2004c7880ebc53800aac0c6b3d" class="sku">
+          <div class="content">
+            <div class="cover">
+              <img src="imgs/1.png" class="cover-img" />
+              <img src="imgs/rank-top1.png" class="cover-rank" />
+            </div>
+          </div>
+          <div class="comment">
+            <strong>他们或许能改变足球...</strong>
+            <div class="desc">
+              <img src="imgs/up.png" class="icon-inline" />
+              <span class="desc-number">逗比的雀巢</span>
+              <i class="iconfont icon-zhi"></i>
+              <img src="imgs/vidio.png" class="icon-inline" />
+              <span class="desc-number">615.4w</span>
+              <i class="iconfont icon-zhi"></i>
+              <img src="imgs/comment.png" class="icon-inline" />
+              <span class="desc-number">8517</span>
+            </div>
+          </div>
+        </a>
+        <a href="https://www.bilibili.com/video/BV1pvWGznEzM/?vd_source=31ac2d2004c7880ebc53800aac0c6b3d" class="sku">
+          <div class="content">
+            <div class="cover">
+              <img src="imgs/2.png" class="cover-img" />
+              <img src="imgs/rank-top2.png" class="cover-rank" />
+            </div>
+          </div>
+          <div class="comment">
+            <strong>什么？烦人的800米能临时抱佛脚？</strong>
+            <div class="desc">
+              <img src="imgs/up.png" class="icon-inline" />
+              <span class="desc-number">小聪明张建国</span>
+              <i class="iconfont icon-zhi"></i>
+              <img src="imgs/vidio.png" class="icon-inline" />
+              <span class="desc-number">498.2w</span>
+              <i class="iconfont icon-zhi"></i>
+              <img src="imgs/comment.png" class="icon-inline" />
+              <span class="desc-number">1304</span>
+            </div>
+          </div>
+        </a>
+         <a href="https://www.bilibili.com/video/BV1HcnNzSEyH/" class="sku">
+          <div class="content">
+            <div class="cover">
+              <img src="imgs/3.png" class="cover-img" />
+              <img src="imgs/rank-top3.png" class="cover-rank" />
+            </div>
+          </div>
+          <div class="comment">
+            <strong>3晚7万！这可能是我住过最离谱的酒店了</strong>
+            <div class="desc">
+              <img src="imgs/up.png" class="icon-inline" />
+              <span class="desc-number">杰克小兔</span>
+              <i class="iconfont icon-zhi"></i>
+              <img src="imgs/vidio.png" class="icon-inline" />
+              <span class="desc-number">367.9w</span>
+              <i class="iconfont icon-zhi"></i>
+              <img src="imgs/comment.png" class="icon-inline" />
+              <span class="desc-number">6830</span>
+            </div>
+          </div>
+        </a>
+        </a>
+         <a href="https://www.bilibili.com/video/BV17rJSzTEjs/" class="sku">
+          <div class="content">
+            <div class="cover">
+              <img src="imgs/4.png" class="cover-img" />
+              <img src="imgs/rank-top4.png" class="cover-rank" />
+            </div>
+          </div>
+          <div class="comment">
+            <strong>一人一首成名曲，首首专打周杰伦！</strong>
+            <div class="desc">
+              <img src="imgs/up.png" class="icon-inline" />
+              <span class="desc-number">happy萌萌酱</span>
+              <i class="iconfont icon-zhi"></i>
+              <img src="imgs/vidio.png" class="icon-inline" />
+              <span class="desc-number">145.2w</span>
+              <i class="iconfont icon-zhi"></i>
+              <img src="imgs/comment.png" class="icon-inline" />
+              <span class="desc-number">8751</span>
+            </div>
+          </div>
+        </a>
+        </a>
+         <a href="https://www.bilibili.com/video/BV1Jmn8zsE6m/?vd_source=31ac2d2004c7880ebc53800aac0c6b3d" class="sku">
+          <div class="content">
+            <div class="cover">
+              <img src="imgs/5.png" class="cover-img" />
+              <img src="imgs/rank-top5.png" class="cover-rank" />
+            </div>
+          </div>
+          <div class="comment">
+            <strong>1小时循环《压力之歌》灌伤害骗骗花！</strong>
+            <div class="desc">
+              <img src="imgs/up.png" class="icon-inline" />
+              <span class="desc-number">音乐老友</span>
+              <i class="iconfont icon-zhi"></i>
+              <img src="imgs/vidio.png" class="icon-inline" />
+              <span class="desc-number">96.2w</span>
+              <i class="iconfont icon-zhi"></i>
+              <img src="imgs/comment.png" class="icon-inline" />
+              <span class="desc-number">138</span>
+            </div>
+          </div>
+        </a>
+      </main>
+    </div>
+  </body>
+</html>
