@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="cn">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>QQ音乐</title>
+    <style>
+      :root {
+        --primary-color: #31c27c;
+      }
+      h1 {
+        text-align: center;
+      }
+      body {
+        margin: 0;
+        background: #f5f5f5;
+        font-family: Microsoft Yahei;
+        font-size: 14px;
+        min-width: 1000px;
+      }
+      a {
+        text-decoration: none;
+        color: #000;
+      }
+      header {
+        height: 90px;
+        background: white;
+        display: flex;
+        align-items: center;
+      }
+      .header-inner,
+      main {
+        width: 1200px;
+        margin: auto;
+      }
+      .tag-list {
+        margin-top: 50px;
+        margin-bottom: 15px;
+        text-align: center;
+      }
+      .tag-item {
+        display: inline-block;
+        padding: 0 8px;
+        margin-right: 24px;
+        line-height: 26px;
+        color: #000;
+        text-decoration: none;
+      }
+      .tag-active {
+        background: var(--primary-color);
+        color: white;
+        border-radius: 25%;
+      }
+      .tag-item:not(.tag-active):hover {
+        color: var(--primary-color);
+        transition: 0.2s;
+      }
+      .nowrap {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .playlist {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 45px 15px;
+        margin-bottom: 45px;
+      }
+      .smallplaylist {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 24px;
+      }
+      .small-album {
+        display: flex;
+        align-items: center;
+        background: #fff;
+        padding: 12px 16px;
+        border-radius: 8px;
+      }
+      .small-cover-wrap {
+        position: relative;
+        overflow: hidden;
+        width: 86px;
+        height: 86px;
+        flex: 0 0 86px;
+        display: block;
+        border-radius: 6px;
+        margin-right: 16px;
+        cursor: pointer;
+      }
+      another-cover-warp{
+        position: relative;
+        overflow: hidden;
+        width: 164px;
+        height: 60px;
+        flex: 0 0 86px;
+        display: block;
+        border-radius: 6px;
+        margin-right: 16px;
+        cursor: pointer;
+      }
+      .small-cover-wrap .cover-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: all 0.5s;
+      }
+      .small-album .info {
+        flex: 1;
+        min-width: 0; /* 让省略号生效 */
+      }
+      .small-album-title {
+        font-weight: 700;
+        margin-bottom: 6px;
+      }
+      .small-album-title:hover {
+        color: var(--primary-color);
+      }
+      .small-album-author {
+        color: #999;
+      }
+      .small-album-time {
+        color: #999;
+        margin-left: 12px;
+      }
+      .cover-wrap {
+        display: flex;
+        position: relative;
+        overflow: hidden;
+        width: 100%;
+        margin-bottom: 15px;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+      }
+      .cover-img {
+        width: 100%;
+        transition: all 0.75s;
+      }
+      .cover-mask {
+        position: absolute;
+        left: 0;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        background: #000;
+        opacity: 0;
+        transition: all 0.5s;
+        z-index: 1;
+      }
+      .cover-play {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        margin-left: -35px;
+        margin-top: -35px;
+        opacity: 0;
+        transform: scale(0.7);
+        transition: all 0.5s;
+      }
+      .cover-wrap:hover .cover-mask {
+        opacity: 0.2;
+      }
+      .cover-wrap:hover .cover-play {
+        opacity: 1;
+        transform: scale(1);
+      }
+      .cover-wrap:hover .cover-img {
+        transform: scale(1.07);
+      }
+      /* 小图与大图相同的悬停效果 */
+      .small-cover-wrap:hover .cover-mask {
+        opacity: 0.2;
+      }
+      .small-cover-wrap:hover .cover-play {
+        opacity: 1;
+        transform: scale(1);
+      }
+      .small-cover-wrap:hover .cover-img {
+        transform: scale(1.07);
+      }
+      .album-title:hover {
+        color: var(--primary-color);
+      }
+      .album-author {
+        color: #999;
+        line-height: 1.6;
+      }
+      .album-author:hover {
+        color: var(--primary-color);
+      }
+      .album-time {
+        color: #999;
+      }
+      .page {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .page-item {
+        display: inline-block;
+        color: #a2a2a2;
+        line-height: 50px;
+        padding: 0 20px;
+        margin: 10px;
+        font-size: 16px;
+      }
+      .page-current,
+      .page-item:not(.page-more):hover {
+        background: var(--primary-color);
+        color: white;
+      }
+      footer {
+        margin-top: 60px;
+        background: #333;
+        height: 200px;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="header-inner">
+        <img src="imgs/qqmusic.png" />
+      </div>
+    </header>
+
+    <main>
+      <div class="Recommendedplaylists">
+        <h1>歌单推荐</h1>
+        <div class="tag-list">
+          <a href="#" class="tag-item tag-active">内地</a>
+          <a href="#" class="tag-item">港台</a>
+          <a href="#" class="tag-item">欧美</a>
+          <a href="#" class="tag-item">韩国</a>
+          <a href="#" class="tag-item">日本</a>
+          <a href="#" class="tag-item">其他</a>
+        </div>
+        <div class="playlist">
+          <div class="album">
+            <a href="#" class="cover-wrap">
+              <img src="imgs/10001.jpg" class="cover-img" />
+              <div class="cover-mask"></div>
+              <img src="imgs/cover_play.png" class="cover-play" />
+            </a>
+            <div>
+              <a href="#" class="nowrap album-title"
+                >抖音新风向，这些歌一定要收藏</a
+              >
+            </div>
+            <div>
+              <a href="#" class="nowrap album-author">播放量：169.7万</a>
+            </div>
+          </div>
+          <div class="album">
+            <a href="#" class="cover-wrap">
+              <img src="imgs/10002.jpg" class="cover-img" />
+              <div class="cover-mask"></div>
+              <img src="imgs/cover_play.png" class="cover-play" />
+            </a>
+            <div>
+              <a href="#" class="nowrap album-title"
+                >抖音热歌，戴上耳机即刻沉浸</a
+              >
+            </div>
+            <div>
+              <a href="#" class="nowrap album-author">播放量：1.5亿</a>
+            </div>
+          </div>
+          <div class="album">
+            <a href="#" class="cover-wrap">
+              <img src="imgs/10003.jpg" class="cover-img" />
+              <div class="cover-mask"></div>
+              <img src="imgs/cover_play.png" class="cover-play" />
+            </a>
+            <div>
+              <a href="#" class="nowrap album-title"
+                >抖音热门歌曲：火爆全网特好听</a
+              >
+            </div>
+            <div>
+              <a href="#" class="nowrap album-author">播放量：3627.9万</a>
+            </div>
+          </div>
+          <div class="album">
+            <a href="#" class="cover-wrap">
+              <img src="imgs/10004.jpg" class="cover-img" />
+              <div class="cover-mask"></div>
+              <img src="imgs/cover_play.png" class="cover-play" />
+            </a>
+            <div>
+              <a href="#" class="nowrap album-title"
+                >抖音热歌，潮流旋律感觉至上</a
+              >
+            </div>
+            <div>
+              <a href="#" class="nowrap album-author">播放量：8.4亿</a>
+            </div>
+          </div>
+          <div class="album">
+            <a href="#" class="cover-wrap">
+              <img src="imgs/10005.jpg" class="cover-img" />
+              <div class="cover-mask"></div>
+              <img src="imgs/cover_play.png" class="cover-play" />
+            </a>
+            <div>
+              <a href="#" class="nowrap album-title"
+                >抖音热歌，播放量猛增秘籍</a
+              >
+            </div>
+            <div>
+              <a href="#" class="nowrap album-author">播放量：250.5万</a>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="xinge">
+        <h1>新歌首发</h1>
+        <div class="tag-list">
+          <a href="#" class="tag-item tag-active">最新</a>
+          <a href="#" class="tag-item">内地</a>
+          <a href="#" class="tag-item">港台</a>
+          <a href="#" class="tag-item">欧美</a>
+          <a href="#" class="tag-item">韩国</a>
+          <a href="#" class="tag-item">日本</a>
+        </div>
+
+        <div class="smallplaylist">
+          <div class="small-album">
+            <a href="#" class="small-cover-wrap">
+              <img src="imgs/10006.jpeg" class="cover-img" />
+              <div class="cover-mask"></div>
+              <img src="imgs/cover_play.png" class="cover-play" />
+            </a>
+            <div class="info">
+              <div class="nowrap small-album-title">Pretty Baby</div>
+              <div class="nowrap small-album-author">颜安</div>
+            </div>
+            <div class="nowrap small-album-time">02:58</div>
+          </div>
+
+          <div class="small-album">
+            <a href="#" class="small-cover-wrap">
+              <img src="imgs/10007.jpeg" class="cover-img" />
+              <div class="cover-mask"></div>
+              <img src="imgs/cover_play.png" class="cover-play" />
+            </a>
+            <div class="info">
+              <div class="nowrap small-album-title">金色的屋檐</div>
+              <div class="nowrap small-album-author">胡海泉 / 张碧晨</div>
+            </div>
+            <div class="nowrap small-album-time">03:48</div>
+          </div>
+
+          <div class="small-album">
+            <a href="#" class="small-cover-wrap">
+              <img src="imgs/10008.jpg" class="cover-img" />
+              <div class="cover-mask"></div>
+              <img src="imgs/cover_play.png" class="cover-play" />
+            </a>
+            <div class="info">
+              <div class="nowrap small-album-title">气势如虹中华人民共和国</div>
+              <div class="nowrap small-album-author">
+                王一博 / 十五运动会和...
+              </div>
+            </div>
+            <div class="nowrap small-album-time">03:33</div>
+          </div>
+
+          <div class="small-album">
+            <a href="#" class="small-cover-wrap">
+              <img src="imgs/10009.jpeg" class="cover-img" />
+              <div class="cover-mask"></div>
+              <img src="imgs/cover_play.png" class="cover-play" />
+            </a>
+            <div class="info">
+              <div class="nowrap small-album-title">百年守护故宫博物院</div>
+              <div class="nowrap small-album-author">成龙</div>
+            </div>
+            <div class="nowrap small-album-time">03:47</div>
+          </div>
+
+          <div class="small-album">
+            <a href="#" class="small-cover-wrap">
+              <img src="imgs/10010.jpg" class="cover-img" />
+              <div class="cover-mask"></div>
+              <img src="imgs/cover_play.png" class="cover-play" />
+            </a>
+            <div class="info">
+              <div class="nowrap small-album-title">ME + YOU</div>
+              <div class="nowrap small-album-author">TWICE</div>
+            </div>
+            <div class="nowrap small-album-time">02:55</div>
+          </div>
+
+          <div class="small-album">
+            <a href="#" class="small-cover-wrap">
+              <img src="imgs/10011.jpeg" class="cover-img" />
+              <div class="cover-mask"></div>
+              <img src="imgs/cover_play.png" class="cover-play" />
+            </a>
+            <div class="info">
+              <div class="nowrap small-album-title">SACRIFICE（争）2025</div>
+              <div class="nowrap small-album-author">
+                英雄联盟 / G.E.M. 邓紫棋
+              </div>
+            </div>
+            <div class="nowrap small-album-time">04:09</div>
+          </div>
+        </div>
+      </div>
+      <div class="mv">
+        <h1>MV</h1>
+        <div class="tag-list">
+          <a href="#" class="tag-item tag-active">精选</a>
+          <a href="#" class="tag-item">内地</a>
+          <a href="#" class="tag-item">港台</a>
+          <a href="#" class="tag-item">欧美</a>
+          <a href="#" class="tag-item">韩国</a>
+          <a href="#" class="tag-item">日本</a>
+        </div>
+          <div class="playlist">
+          <div class="album">
+            <a href="#" class="cover-wrap">
+              <img src="imgs/10012 (1).jpg" class="cover-img" />
+              <div class="cover-mask"></div>
+              <img src="imgs/cover_play.png" class="cover-play" />
+            </a>
+            <div>
+              <a href="#" class="nowrap album-title"
+                >来啊</a>
+            </div>
+            <div>
+              <a href="#" class="nowrap album-author">周深</a>
+            </div>
+            <div>
+                <a href="#" class="nowrap album-time">播放量：32.5万</a>
+            </div>
+          </div>
+           <div class="album">
+            <a href="#" class="cover-wrap">
+              <img src="imgs/10012 (2).jpg" class="cover-img" />
+              <div class="cover-mask"></div>
+              <img src="imgs/cover_play.png" class="cover-play" />
+            </a>
+            <div>
+              <a href="#" class="nowrap album-title"
+                >气势如虹</a>
+            </div>
+            <div>
+              <a href="#" class="nowrap album-author">王一博</a>
+            </div>
+            <div>
+                <a href="#" class="nowrap album-time">播放量：1.6万</a>
+            </div>
+          </div>
+           <div class="album">
+            <a href="#" class="cover-wrap">
+              <img src="imgs/10012 (3).jpg" class="cover-img" />
+              <div class="cover-mask"></div>
+              <img src="imgs/cover_play.png" class="cover-play" />
+            </a>
+            <div>
+              <a href="#" class="nowrap album-title"
+                >岁岁年年</a>
+            </div>
+            <div>
+              <a href="#" class="nowrap album-author">肖战</a>
+            </div>
+            <div>
+                <a href="#" class="nowrap album-time">播放量：13.1万</a>
+            </div>
+          </div>
+           <div class="album">
+            <a href="#" class="cover-wrap">
+              <img src="imgs/10012 (4).jpg" class="cover-img" />
+              <div class="cover-mask"></div>
+              <img src="imgs/cover_play.png" class="cover-play" />
+            </a>
+            <div>
+              <a href="#" class="nowrap album-title"
+                >Rruit Fly</a>
+            </div>
+            <div>
+              <a href="#" class="nowrap album-author">窦靖童 /The Black Skirts</a>
+            </div>
+            <div>
+                <a href="#" class="nowrap album-time">播放量：3456</a>
+            </div>
+          </div>
+           <div class="album">
+            <a href="#" class="cover-wrap">
+              <img src="imgs/10012 (5).jpg" class="cover-img" />
+              <div class="cover-mask"></div>
+              <img src="imgs/cover_play.png" class="cover-play" />
+            </a>
+            <div>
+              <a href="#" class="nowrap album-title"
+                >我的对</a>
+            </div>
+            <div>
+              <a href="#" class="nowrap album-author">周深</a>
+            </div>
+            <div>
+                <a href="#" class="nowrap album-time">播放量：6.5万</a>
+            </div>
+          </div>
+           <div class="album">
+            <a href="#" class="cover-wrap">
+              <img src="imgs/10012 (6).jpg" class="cover-img" />
+              <div class="cover-mask"></div>
+              <img src="imgs/cover_play.png" class="cover-play" />
+            </a>
+            <div>
+              <a href="#" class="nowrap album-title"
+                >祝福的心</a>
+            </div>
+            <div>
+              <a href="#" class="nowrap album-author">易烊千玺</a>
+            </div>
+            <div>
+                <a href="#" class="nowrap album-time">播放量：8127</a>
+            </div>
+          </div>
+           <div class="album">
+            <a href="#" class="cover-wrap">
+              <img src="imgs/10012 (7).jpg" class="cover-img" />
+              <div class="cover-mask"></div>
+              <img src="imgs/cover_play.png" class="cover-play" />
+            </a>
+            <div>
+              <a href="#" class="nowrap album-title"
+                >全宇宙的引力</a>
+            </div>
+            <div>
+              <a href="#" class="nowrap album-author">王源</a>
+            </div>
+            <div>
+                <a href="#" class="nowrap album-time">播放量：9818</a>
+            </div>
+          </div>
+           <div class="album">
+            <a href="#" class="cover-wrap">
+              <img src="imgs/10012 (8).jpg" class="cover-img" />
+              <div class="cover-mask"></div>
+              <img src="imgs/cover_play.png" class="cover-play" />
+            </a>
+            <div>
+              <a href="#" class="nowrap album-title"
+                >PEACE & VIOLENCE</a>
+            </div>
+            <div>
+              <a href="#" class="nowrap album-author">Faouzia</a>
+            </div>
+            <div>
+                <a href="#" class="nowrap album-time">播放量：7362</a>
+            </div>
+          </div>
+           <div class="album">
+            <a href="#" class="cover-wrap">
+              <img src="imgs/10012 (9).jpg" class="cover-img" />
+              <div class="cover-mask"></div>
+              <img src="imgs/cover_play.png" class="cover-play" />
+            </a>
+            <div>
+              <a href="#" class="nowrap album-title"
+                >一念之间-在空中</a>
+            </div>
+            <div>
+              <a href="#" class="nowrap album-author">齐豫/吴青峰</a>
+            </div>
+            <div>
+                <a href="#" class="nowrap album-time">播放量：1.7万</a>
+            </div>
+          </div>
+           <div class="album">
+            <a href="#" class="cover-wrap">
+              <img src="imgs/10012 (10).jpg" class="cover-img" />
+              <div class="cover-mask"></div>
+              <img src="imgs/cover_play.png" class="cover-play" />
+            </a>
+            <div>
+              <a href="#" class="nowrap album-title"
+                >小镇帅哥</a>
+            </div>
+            <div>
+              <a href="#" class="nowrap album-author">王一珩OneSD</a>
+            </div>
+            <div>
+                <a href="#" class="nowrap album-time">播放量：1.8万</a>
+            </div>
+          </div>
+      </div>
+    </main>
+  </body>
+</html>
