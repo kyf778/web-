@@ -1,0 +1,500 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>待办事项</title>
+<style>
+  :root{
+    --bg:#f7f8fb;
+    --card:#ffffff;
+    --primary:#5c4dff;
+    --muted:#9aa0ad;
+    --success:#31c27c;
+    --danger:#e55353;
+    --shadow: 0 6px 20px rgba(34,34,34,0.06);
+    --radius:14px;
+    font-family: "PingFang SC","Microsoft Yahei",Segoe UI,Roboto,"Helvetica Neue",Arial;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    background:linear-gradient(180deg,#f6f7fb,#ffffff 60%);
+    min-height:100vh;
+    display:flex;
+    align-items:flex-start;
+    justify-content:center;
+    padding:36px 16px;
+  }
+  .app{
+    width:100%;
+    max-width:900px;
+    background:var(--bg);
+    border-radius:16px;
+    padding:28px;
+    box-shadow: var(--shadow);
+  }
+
+  header{
+    text-align:center;
+    margin-bottom:18px;
+  }
+  header h1{
+    margin:0;
+    font-size:40px;
+    color:var(--primary);
+    letter-spacing:2px;
+  }
+  header p{ margin:8px 0 0; color:var(--muted) }
+
+  .card{
+    background:var(--card);
+    border-radius:12px;
+    padding:18px;
+    box-shadow: 0 6px 18px rgba(17,17,17,0.04);
+  }
+
+  .input-row{
+    display:flex;
+    gap:12px;
+    align-items:center;
+    margin-bottom:14px;
+  }
+  .input-row input[type="text"]{
+    flex:1;
+    padding:12px 14px;
+    border-radius:10px;
+    border:1px solid #e6e9ef;
+    outline:none;
+    font-size:15px;
+  }
+  .input-row button.add{
+    background:var(--primary);
+    color:#fff;
+    border:none;
+    padding:10px 14px;
+    border-radius:10px;
+    cursor:pointer;
+    box-shadow: 0 6px 14px rgba(92,77,255,0.18);
+    display:flex;
+    gap:8px;
+    align-items:center;
+  }
+  .filters{
+    display:flex;
+    gap:10px;
+    margin-bottom:12px;
+    flex-wrap:wrap;
+  }
+  .filter-btn{
+    padding:8px 14px;
+    border-radius:18px;
+    border:2px solid #d9dbe0;
+    background:white;
+    cursor:pointer;
+    font-size:14px;
+    color:#333;
+  }
+  .filter-btn.active{
+    border-color:var(--primary);
+    color:var(--primary);
+    box-shadow: 0 4px 10px rgba(92,77,255,0.08);
+  }
+
+  .list{
+    margin-top:8px;
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+  }
+  .item{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    padding:16px;
+    border-radius:10px;
+    background:#fbfcfd;
+    border:1px solid rgba(0,0,0,0.02);
+    transform-origin:left;
+    overflow:hidden;
+    transition: transform .28s cubic-bezier(.2,.9,.2,1), opacity .22s ease, max-height .28s ease, margin .22s ease;
+  }
+  .item.enter{
+    transform: translateY(-8px) scale(.995);
+    opacity:0;
+    max-height:0;
+    margin:0;
+  }
+  .item.enter-active{
+    transform:none;
+    opacity:1;
+    max-height:120px;
+  }
+  .item.remove{
+    opacity:0;
+    transform: translateX(20px) scale(.98);
+    max-height:0;
+    margin:0;
+    padding-top:0;
+    padding-bottom:0;
+  }
+
+  .checkbox{
+    width:22px;
+    height:22px;
+    border-radius:6px;
+    border:2px solid #d6d9df;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+  }
+  .checkbox.checked{
+    background:linear-gradient(180deg,var(--primary),#3f2eff);
+    border-color:transparent;
+    color:white;
+  }
+  .todo-text{
+    flex:1;
+    font-size:16px;
+    color:#222;
+    word-break:break-word;
+  }
+  .todo-text.completed{
+    color:var(--muted);
+    text-decoration:line-through;
+  }
+  .meta{
+    display:flex;
+    gap:10px;
+    align-items:center;
+  }
+  .del{
+    background:transparent;
+    border:none;
+    cursor:pointer;
+    padding:8px;
+    border-radius:8px;
+  }
+  .del:hover{ background:#fff4f4 }
+
+  .footer{
+    margin-top:18px;
+    padding:14px;
+    border-radius:10px;
+    background:#fff;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    color:var(--muted);
+    font-size:15px;
+    box-shadow: 0 6px 12px rgba(17,17,17,0.03);
+  }
+
+  /* small screens */
+  @media (max-width:600px){
+    header h1{ font-size:32px }
+    .input-row{ flex-direction:column; align-items:stretch }
+    .input-row button.add{ width:100% }
+    .meta{ gap:6px }
+    .todo-text{ font-size:15px }
+  }
+</style>
+</head>
+<body>
+  <div class="app" role="application" aria-labelledby="title">
+    <header>
+      <h1 id="title">待办事项</h1>
+      <p>简单高效地管理你的任务</p>
+    </header>
+
+    <section class="card" aria-label="待办输入区">
+      <div class="input-row">
+        <input id="todo-input" type="text" placeholder="添加新的待办事项..." aria-label="新待办输入" />
+        <button class="add" id="add-btn" aria-label="添加待办">＋ 添加</button>
+      </div>
+
+      <div class="filters" role="tablist" aria-label="筛选">
+        <button class="filter-btn active" data-filter="all" role="tab" aria-selected="true">全部</button>
+        <button class="filter-btn" data-filter="active" role="tab" aria-selected="false">未完成</button>
+        <button class="filter-btn" data-filter="completed" role="tab" aria-selected="false">已完成</button>
+      </div>
+
+      <div class="list" id="todo-list" aria-live="polite"></div>
+    </section>
+
+    <div class="footer" id="footer">
+      <div id="count">0 个未完成，0 个总计</div>
+      <div>
+        <button id="clear-completed" class="filter-btn" title="清除已完成">清除已完成</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+/**
+ * TodoItem: 表示单个待办项的数据结构
+ * - id: 唯一 id（时间戳 + 随机）
+ * - text: 文本内容
+ * - completed: 是否完成
+ * - created: 创建时间（可用于排序）
+ */
+class TodoItem {
+  constructor(text){
+    this.id = Date.now().toString(36) + Math.random().toString(36).slice(2,8);
+    this.text = text;
+    this.completed = false;
+    this.created = Date.now();
+  }
+}
+
+/**
+ * TodoApp: 应用逻辑（管理DOM、事件、存储）
+ */
+class TodoApp {
+  constructor(opts = {}){
+    this.storageKey = opts.storageKey || 'purejs_todo_v1';
+    this.listEl = document.getElementById('todo-list');
+    this.inputEl = document.getElementById('todo-input');
+    this.addBtn = document.getElementById('add-btn');
+    this.filterBtns = document.querySelectorAll('.filter-btn[data-filter]');
+    this.countEl = document.getElementById('count');
+    this.clearCompletedBtn = document.getElementById('clear-completed');
+
+    this.todos = []; // 保存 TodoItem 的数组
+    this.filter = 'all'; // all | active | completed
+
+    this._loadFromStorage();
+    this._bindEvents();
+    this.render();
+  }
+
+  _bindEvents(){
+    // 添加：回车或按钮
+    this.inputEl.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') this.addFromInput();
+    });
+    this.addBtn.addEventListener('click', () => this.addFromInput());
+
+    // 过滤按钮
+    this.filterBtns.forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const f = btn.dataset.filter;
+        this.setFilter(f);
+      });
+    });
+
+    // 委托：复选框切换 / 删除
+    this.listEl.addEventListener('click', (e) => {
+      const li = e.target.closest('.item');
+      if (!li) return;
+      const id = li.dataset.id;
+      if (e.target.closest('.checkbox')) {
+        this.toggleComplete(id, li);
+      } else if (e.target.closest('.del')) {
+        this.remove(id, li);
+      }
+    });
+
+    // 清除已完成
+    this.clearCompletedBtn.addEventListener('click', () => {
+      this.clearCompleted();
+    });
+
+    // 可选：在卸载前保存
+    window.addEventListener('beforeunload', () => {
+      this._saveToStorage();
+    });
+  }
+
+  setFilter(f){
+    this.filter = f;
+    // 更新按钮样式和 aria-selected
+    this.filterBtns.forEach(btn => {
+      const is = btn.dataset.filter === f;
+      btn.classList.toggle('active', is);
+      btn.setAttribute('aria-selected', is ? 'true' : 'false');
+    });
+    this.render();
+  }
+
+  addFromInput(){
+    const val = this.inputEl.value.trim();
+    if (!val) {
+      // 简单提示，可改为更好的UI反馈
+      this.inputEl.focus();
+      return;
+    }
+    const item = new TodoItem(val);
+    this.todos.unshift(item); // 新项放在最前面
+    this.inputEl.value = '';
+    this._saveToStorage();
+    this.render(true, item.id);
+  }
+
+  toggleComplete(id, liEl){
+    const t = this.todos.find(x=>x.id===id);
+    if (!t) return;
+    t.completed = !t.completed;
+    this._saveToStorage();
+    // 更新DOM动画/样式
+    const checkbox = liEl.querySelector('.checkbox');
+    const text = liEl.querySelector('.todo-text');
+    if (t.completed){
+      checkbox.classList.add('checked');
+      text.classList.add('completed');
+    } else {
+      checkbox.classList.remove('checked');
+      text.classList.remove('completed');
+    }
+    this._updateFooter();
+  }
+
+  remove(id, liEl){
+    // 动画：加上 remove 类，监听 transitionend 后真正删除
+    liEl.classList.add('remove');
+    liEl.addEventListener('transitionend', () => {
+      this.todos = this.todos.filter(x=>x.id!==id);
+      this._saveToStorage();
+      liEl.remove();
+      this._updateFooter();
+    }, {once:true});
+  }
+
+  clearCompleted(){
+    // 在DOM上对已完成项做动画然后移除
+    const completedIds = this.todos.filter(t=>t.completed).map(t=>t.id);
+    if (completedIds.length === 0) return;
+    completedIds.forEach(id => {
+      const li = this.listEl.querySelector(`.item[data-id="${id}"]`);
+      if (li){
+        li.classList.add('remove');
+        li.addEventListener('transitionend', () => {
+          const idx = this.todos.findIndex(x=>x.id===id);
+          if (idx>-1) this.todos.splice(idx,1);
+          li.remove();
+          this._saveToStorage();
+          this._updateFooter();
+        }, {once:true});
+      } else {
+        // 如果DOM中已被过滤隐藏，则直接从数组中删除
+        const idx = this.todos.findIndex(x=>x.id===id);
+        if (idx>-1) this.todos.splice(idx,1);
+        this._saveToStorage();
+        this._updateFooter();
+      }
+    });
+  }
+
+  render(justAdded=false, addedId=null){
+    // 清空并按 filter 渲染
+    this.listEl.innerHTML = '';
+    let toShow = this.todos.slice(); // shallow copy
+    // 根据 filter 筛选
+    if (this.filter === 'active') toShow = toShow.filter(t=>!t.completed);
+    else if (this.filter === 'completed') toShow = toShow.filter(t=>t.completed);
+
+    // 按时间排序：创建时间较新的在上面（已在 add 时 unshift）
+    toShow.forEach(item => {
+      const li = this._createItemElement(item);
+      // 如果刚刚添加的项，先给一个 enter 类触发表现
+      if (justAdded && item.id === addedId) {
+        li.classList.add('enter');
+        // 强制重绘以触发 transition，之后移除 enter 类来执行 enter 动画
+        requestAnimationFrame(()=> {
+          li.classList.add('enter-active');
+          li.classList.remove('enter');
+          // 清理 enter-active（保持在正常状态即可）
+          setTimeout(()=> li.classList.remove('enter-active'), 350);
+        });
+      }
+      this.listEl.appendChild(li);
+    });
+    this._updateFooter();
+  }
+
+  _createItemElement(item){
+    const li = document.createElement('div');
+    li.className = 'item';
+    li.dataset.id = item.id;
+    li.setAttribute('role','listitem');
+
+    const checkbox = document.createElement('div');
+    checkbox.className = 'checkbox' + (item.completed ? ' checked' : '');
+    checkbox.setAttribute('aria-label', item.completed ? '标记为未完成' : '标记为已完成');
+    checkbox.setAttribute('title', item.completed ? '标记为未完成' : '标记为已完成');
+
+    // checkmark (SVG)
+    checkbox.innerHTML = item.completed ? '<svg width="14" height="10" viewBox="0 0 14 10" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1 5L5 9L13 1" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>' : '';
+
+    const text = document.createElement('div');
+    text.className = 'todo-text' + (item.completed ? ' completed' : '');
+    text.textContent = item.text;
+
+    const meta = document.createElement('div');
+    meta.className = 'meta';
+
+    const del = document.createElement('button');
+    del.className = 'del';
+    del.setAttribute('aria-label','删除待办');
+    del.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 6h18" stroke="#c94b4b" stroke-width="1.6" stroke-linecap="round"/><path d="M8 6v12a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2V6" stroke="#c94b4b" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+    meta.appendChild(del);
+
+    li.appendChild(checkbox);
+    li.appendChild(text);
+    li.appendChild(meta);
+
+    return li;
+  }
+
+  _updateFooter(){
+    const total = this.todos.length;
+    const active = this.todos.filter(t=>!t.completed).length;
+    this.countEl.textContent = `${active} 个未完成，${total} 个总计`;
+  }
+
+  _saveToStorage(){
+    try{
+      localStorage.setItem(this.storageKey, JSON.stringify(this.todos));
+    }catch(e){
+      console.warn('保存到 localStorage 失败', e);
+    }
+  }
+
+  _loadFromStorage(){
+    try{
+      const raw = localStorage.getItem(this.storageKey);
+      if (!raw) {
+        // 初始化示例项（可去掉）
+        this.todos = [
+          new TodoItem('7点早读'), 
+          new TodoItem('8点早餐')
+        ];
+        // 标记第一个为已完成示例
+        this.todos[0].completed = true;
+        return;
+      }
+      const arr = JSON.parse(raw);
+      // 转换为 TodoItem 结构（保持已经存字段）
+      this.todos = arr.map(a => {
+        const t = new TodoItem(a.text || '');
+        t.id = a.id;
+        t.completed = !!a.completed;
+        t.created = a.created || Date.now();
+        return t;
+      });
+    }catch(e){
+      console.warn('从 localStorage 读取失败，使用空列表', e);
+      this.todos = [];
+    }
+  }
+}
+
+// 实例化应用
+document.addEventListener('DOMContentLoaded', () => {
+  new TodoApp();
+});
+</script>
+</body>
+</html>
